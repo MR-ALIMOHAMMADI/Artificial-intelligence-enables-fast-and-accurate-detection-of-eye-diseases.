@@ -1,1 +1,49 @@
-svsds
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score
+
+# Load data
+iris = load_iris()
+X = pd.DataFrame(iris.data, columns=iris.feature_names)
+y = pd.Series(iris.target)
+target_names = iris.target_names
+
+# Best feature pair
+f1, f2 = "petal length (cm)", "petal width (cm)"
+
+# -------- Scatter Plot --------
+plt.figure(figsize=(6,5))
+for k, name in enumerate(target_names):
+    idx = y == k
+    plt.scatter(X.loc[idx, f1], X.loc[idx, f2], label=name)
+
+plt.xlabel(f1)
+plt.ylabel(f2)
+plt.title("Iris – Best Feature Pair Scatter")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+# -------- Confusion Matrix --------
+X_pair = X[[f1, f2]]
+X_train, X_test, y_train, y_test = train_test_split(
+    X_pair, y, test_size=0.3, random_state=42, stratify=y
+)
+
+model = DecisionTreeClassifier(random_state=0)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+acc = accuracy_score(y_test, y_pred)
+cm = confusion_matrix(y_test, y_pred)
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=target_names)
+disp.plot(values_format="d", cmap=None)  # بدون رنگ دستی
+plt.title(f"Confusion Matrix (Acc={acc:.3f})")
+plt.tight_layout()
+plt.show()
